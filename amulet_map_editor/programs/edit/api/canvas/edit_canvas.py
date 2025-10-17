@@ -1,10 +1,11 @@
 import logging
 import warnings
-import wx
 import sys
 from typing import Callable, TYPE_CHECKING, Any, Generator, Optional
 from types import GeneratorType
 from threading import RLock, Thread
+
+import wx
 
 from .base_edit_canvas import BaseEditCanvas
 from ...edit import EDIT_CONFIG_ID

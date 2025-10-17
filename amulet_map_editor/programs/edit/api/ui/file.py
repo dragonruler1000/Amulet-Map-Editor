@@ -56,7 +56,8 @@ class FilePanel(wx.BoxSizer, EditCanvasContainer):
             self._projection_button, 0, wx.TOP | wx.BOTTOM | wx.RIGHT | wx.CENTER, 5
         )
         self._location_button = wx.Button(
-            wx_parent, label=", ".join([f"{s:.2f}" for s in self.canvas.camera.location])
+            wx_parent,
+            label=", ".join([f"{s:.2f}" for s in self.canvas.camera.location]),
         )
         self._location_button.SetToolTip(
             lang.get("program_3d_edit.file_ui.location_tooltip")

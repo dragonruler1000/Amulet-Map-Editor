@@ -43,7 +43,10 @@ class ToolManagerSizer(wx.BoxSizer, EditCanvasContainer):
         self._tool_option_sizer_shove_left.AddStretchSpacer(1)
         self.AddStretchSpacer(1)
         self.Add(
-            self._tool_option_sizer_shove_left, 0, wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN, 0
+            self._tool_option_sizer_shove_left,
+            0,
+            wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN,
+            0,
         )
         self.AddStretchSpacer(1)
 

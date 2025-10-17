@@ -1,7 +1,7 @@
 from typing import Optional, Callable
 import logging
-
 import sys
+
 import wx
 from wx.glcanvas import GLCanvas, GLAttributes, GLContext, GLContextAttrs
 from OpenGL.GL import (
@@ -35,6 +35,7 @@ if sys.platform == "linux":
 else:
     Canvas_Type = GLCanvas
 
+
 class BaseCanvas(Canvas_Type):
     _context: Optional[GLContext]
 
@@ -63,6 +64,7 @@ class BaseCanvas(Canvas_Type):
                 new_event.SetPosition(event.GetPosition())
                 wx.PostEvent(self, new_event)
                 event.Skip()  # Continue processing normally
+
             self._opengl_canvas.Bind(wx.EVT_RIGHT_DOWN, forward_event)
             self._opengl_canvas.Bind(wx.EVT_RIGHT_UP, forward_event)
             self._opengl_canvas.Bind(wx.EVT_LEFT_DOWN, forward_event)
@@ -115,7 +117,7 @@ class BaseCanvas(Canvas_Type):
         self._init = False
 
         self.Bind(wx.EVT_SHOW, self._on_show)
-    
+
     def resize(self, event):
         self._opengl_canvas.SetCurrent(self._context)
         glViewport(0, 0, event.GetSize().x, event.GetSize().y)

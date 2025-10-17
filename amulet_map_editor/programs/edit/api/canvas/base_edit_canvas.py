@@ -312,7 +312,10 @@ class BaseEditCanvas(EventCanvas):
         evt.Skip()
 
     def _set_size(self):
-        size = self._opengl_canvas.GetClientSize() * self._opengl_canvas.GetContentScaleFactor()
+        size = (
+            self._opengl_canvas.GetClientSize()
+            * self._opengl_canvas.GetContentScaleFactor()
+        )
         width, height = size
         self._opengl_canvas.SetCurrent(self._context)
         glViewport(0, 0, width, height)
