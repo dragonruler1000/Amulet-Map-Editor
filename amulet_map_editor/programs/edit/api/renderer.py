@@ -235,13 +235,13 @@ class Renderer(EditCanvasContainer):
 
         def end_draw(self):
             """Run commands after drawing."""
-            self.canvas._opengl_canvas.SwapBuffers()
+            self.canvas.SwapBuffers()
 
     else:
 
         def end_draw(self):
             """Run commands after drawing."""
-            self.canvas._opengl_canvas.SwapBuffers()
+            self.canvas.SwapBuffers()
             self._chunk_generator.thread_action()
 
     def _gc(self, event):

@@ -30,13 +30,53 @@ Upon the window being shown the OpenGL context is activated and the state can be
 Objects that need to bind textures or data should do so in the draw function so they can be sure the context is set.
 """
 
-if sys.platform == "linux":
-    Canvas_Type = wx.Window
+Fix1150 = sys.platform == "linux"
+if Fix1150:
+    class Canvas(wx.Window):
+        """A class that behaves like a wx.GLCanvas but is actually a wx.GLWindow containing a canvas."""
+
+        def __init__(self, parent: wx.Window, *args, **kwargs) -> None:
+            super().__init__(parent)
+            self._opengl_canvas = GLCanvas(*args, **kwargs)
+
+        def CreateSurface(self) -> bool:
+            return self._opengl_canvas.CreateSurface()
+
+        @staticmethod
+        def GetClassDefaultAttributes(variant: wx.WindowVariant = wx.WINDOW_VARIANT_NORMAL) -> wx.VisualAttributes:
+            return GLCanvas.GetClassDefaultAttributes(variant)
+
+        @staticmethod
+        def IsDisplaySupported(dispAttrs: GLAttributes | list[int]) -> bool:
+            return GLCanvas.IsDisplaySupported(dispAttrs)
+
+        @staticmethod
+        def IsExtensionSupported(extension: str) -> bool:
+            return GLCanvas.IsExtensionSupported(extension)
+
+        def SetColour(self, colour: str) -> bool:
+            return self._opengl_canvas.SetColour(colour)
+
+        def SetCurrent(self, context: GLContext) -> bool:
+            return self._opengl_canvas.SetCurrent(context)
+
+        def SwapBuffers(self) -> bool:
+            return self._opengl_canvas.SwapBuffers()
+
+        def Bind(self, *args, **kwargs):
+            return self._opengl_canvas.Bind(*args, **kwargs)
+
+        def Unbind(self, *args, **kwargs) -> bool:
+            return self._opengl_canvas.Unbind(*args, **kwargs)
+
 else:
-    Canvas_Type = GLCanvas
+    class Canvas(GLCanvas):
+        @property
+        def _opengl_canvas(self) -> GLCanvas:
+            return self
 
 
-class BaseCanvas(Canvas_Type):
+class BaseCanvas(Canvas):
     _context: Optional[GLContext]
 
     def __init__(self, parent: wx.Window):
@@ -49,39 +89,12 @@ class BaseCanvas(Canvas_Type):
         display_attributes.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(
             24
         ).EndList()
-        if Canvas_Type == wx.Window:
-            super().__init__(parent)
-            # self.SetSizer(self._canvas_sizer)
-            self._opengl_canvas = GLCanvas( self,
-                display_attributes,
-                size=parent.GetClientSize(),
-                style=wx.WANTS_CHARS,
-            )
-
-            def forward_event(event):
-                # Create a new mouse event and send it to the parent
-                new_event = wx.MouseEvent(event.GetEventType())
-                new_event.SetPosition(event.GetPosition())
-                wx.PostEvent(self, new_event)
-                event.Skip()  # Continue processing normally
-
-            self._opengl_canvas.Bind(wx.EVT_RIGHT_DOWN, forward_event)
-            self._opengl_canvas.Bind(wx.EVT_RIGHT_UP, forward_event)
-            self._opengl_canvas.Bind(wx.EVT_LEFT_DOWN, forward_event)
-            self._opengl_canvas.Bind(wx.EVT_LEFT_UP, forward_event)
-            self._opengl_canvas.Bind(wx.EVT_MOTION, forward_event)
-            self._opengl_canvas.Bind(wx.EVT_MOUSEWHEEL, forward_event)
-            self._opengl_canvas.Bind(wx.EVT_SIZING, self.resize)
-        elif Canvas_Type == GLCanvas:
-            super().__init__(
-                parent,
-                display_attributes,
-                size=parent.GetClientSize(),
-                style=wx.WANTS_CHARS,
-            )
-            self._opengl_canvas = self
-        else:
-            raise NotImplementedError
+        super().__init__(
+            parent,
+            display_attributes,
+            size=parent.GetClientSize(),
+            style=wx.WANTS_CHARS,
+        )
 
         # Amulet-Team/Amulet-Map-Editor#84
         # Amulet-Team/Amulet-Map-Editor#597
@@ -118,10 +131,6 @@ class BaseCanvas(Canvas_Type):
 
         self.Bind(wx.EVT_SHOW, self._on_show)
 
-    def resize(self, event):
-        self._opengl_canvas.SetCurrent(self._context)
-        glViewport(0, 0, event.GetSize().x, event.GetSize().y)
-
     @property
     def context(self) -> GLContext:
         return self._context
@@ -139,7 +148,7 @@ class BaseCanvas(Canvas_Type):
 
     def _init_opengl(self):
         """Set up the OpenGL state after the window is first shown."""
-        self._opengl_canvas.SetCurrent(self._context)
+        self.SetCurrent(self._context)
         gl_version = glGetString(GL_VERSION)
         if isinstance(gl_version, bytes):
             gl_version = gl_version.decode("utf-8")

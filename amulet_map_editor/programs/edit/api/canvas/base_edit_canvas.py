@@ -250,7 +250,7 @@ class BaseEditCanvas(EventCanvas):
 
     def enable(self):
         """Enable the canvas and start it working."""
-        self._opengl_canvas.SetCurrent(self._context)
+        self.SetCurrent(self._context)
         self.renderer.enable()
         self.buttons.enable()
 
@@ -313,11 +313,11 @@ class BaseEditCanvas(EventCanvas):
 
     def _set_size(self):
         size = (
-            self._opengl_canvas.GetClientSize()
-            * self._opengl_canvas.GetContentScaleFactor()
+            self.GetClientSize()
+            * self.GetContentScaleFactor()
         )
         width, height = size
-        self._opengl_canvas.SetCurrent(self._context)
+        self.SetCurrent(self._context)
         glViewport(0, 0, width, height)
         if height > 0:
             self.camera.aspect_ratio = width / height
